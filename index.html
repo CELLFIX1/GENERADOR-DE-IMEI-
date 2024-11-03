@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENERADOR DE IMEI</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-800 flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-700 p-8 rounded-lg shadow-md w-80 text-center">
+        <h1 class="text-2xl text-white font-semibold mb-2">GENERADOR DE IMEI GRATIS ALDAZ</h1>
+        <p class="text-sm text-gray-400 mb-4">Generador de imei por tac ingresa los primeros 8 dijitos del imei</p>
+        
+        <!-- Selector de tipo de generación -->
+        <div class="mb-4">
+            <label for="tipo-generacion" class="block text-gray-300 text-left">Tipo de generación de IMEI</label>
+            <select id="tipo-generacion" class="w-full p-2 mt-1 bg-gray-800 text-white rounded border border-gray-600">
+                <option value="tac">Generar por TAC</option>
+            </select>
+        </div>
+
+        <!-- Campo de entrada para TAC -->
+        <div class="mb-4">
+            <label for="tac" class="block text-gray-300 text-left">Ingresar TAC:</label>
+            <input type="text" id="tac" maxlength="8" placeholder="Ingresar TAC (8 dígitos)" class="w-full p-2 mt-1 bg-gray-800 text-white rounded border border-gray-600">
+        </div>
+
+        <!-- Botón de generación -->
+        <button onclick="generarIMEIs()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded font-semibold">Generar</button>
+
+        <!-- Campo para mostrar los IMEIs generados -->
+        <div id="imeiResultado" class="mt-4 text-gray-300 text-sm text-left"></div>
+
+        <!-- Botón para copiar al portapapeles -->
+        <button id="copyButton" onclick="copiarAlPortapapeles()" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded font-semibold mt-2 hidden">Copiar al portapapeles</button>
+
+        <!-- Pie de página -->
+        <p class="text-xs text-gray-400 mt-4">© 2024 AldazUnlock. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        function luhnChecksum(imei) {
+            let sum = 0;
+            for (let i = 0; i < imei.length; i++) {
+                let digit = parseInt(imei[i]);
+                if (i % 2 === 1) {
+                    digit *= 2;
+                }
+                sum += digit > 9 ? digit - 9 : digit;
+            }
+            return (10 - (sum % 10)) % 10;
+        }
+
+        function generarIMEIs() {
+            const tac = document.getElementById("tac").value;
+            if (tac.length !== 8 || isNaN(tac)) {
+                alert("Por favor, ingresa un TAC válido de 8 dígitos.");
+                return;
+            }
+
+            const resultados = [];
+            for (let i = 0; i < 10; i++) {
+                // Generar número de serie aleatorio de 6 dígitos
+                const serialNumber = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+                const partialIMEI = tac + serialNumber;
+
+                // Calcular el dígito de verificación usando el algoritmo de Luhn
+                const checksum = luhnChecksum(partialIMEI);
+                const imei = partialIMEI + checksum;
+
+                // Agregar el IMEI generado a la lista de resultados
+                resultados.push(imei);
+            }
+
+            // Mostrar los IMEIs generados
+            document.getElementById("imeiResultado").innerHTML = resultados.map(imei => `<p>${imei}</p>`).join('');
+            document.getElementById("copyButton").classList.remove("hidden"); // Mostrar botón de copiar
+        }
+
+        function copiarAlPortapapeles() {
+            const imeiTexto = Array.from(document.querySelectorAll("#imeiResultado p"))
+                .map(p => p.textContent)
+                .join('\n');
+
+            navigator.clipboard.writeText(imeiTexto).then(() => {
+                alert("IMEIs copiados al portapapeles.");
+            }).catch(err => {
+                alert("Error al copiar: " + err);
+            });
+        }
+    </script>
+</body>
+</html>
