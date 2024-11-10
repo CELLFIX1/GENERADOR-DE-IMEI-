@@ -1,95 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENERADOR DE IMEI</title>
-    <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de IMEI TAC</title>
+  <link rel="stylesheet" href="https://unpkg.com/flowbite@1.5.3/dist/flowbite.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-800 flex items-center justify-center min-h-screen">
+<body class="bg-gray-800">
+  <div class="container mx-auto py-16 px-4">
+    <div class="max-w-md mx-auto bg-gray-900 rounded-lg shadow-lg p-6">
+      <h1 class="text-2xl font-bold text-white text-center mb-4">Generador de IMEI TAC</h1>
+      
+      <div class="flex flex-col items-center">
+        <label for="tac" class="text-white mb-2 text-center">TAC (Primeros 8 dígitos IMEI):</label>
+        <input type="text" id="tac" class="border border-gray-700 bg-gray-900 text-white px-4 py-2 rounded-md w-full md:max-w-xs" placeholder="Ingrese el TAC" maxlength="8">
 
-    <div class="bg-gray-700 p-8 rounded-lg shadow-md w-80 text-center">
-        <h1 class="text-2xl text-white font-semibold mb-2">GENERADOR DE IMEI GRATIS ALDAZ</h1>
-        <p class="text-sm text-gray-400 mb-4">Generador de imei por tac ingresa los primeros 8 dijitos del imei</p>
+        <button id="generar" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 w-full md:max-w-xs">Generar IMEI</button>
+
+        <div id="resultados" class="mt-4 text-white w-full bg-gray-800 p-4 rounded-md overflow-y-auto" style="max-height: 150px;"></div>
+
+        <!-- Botón para copiar los IMEI generados -->
+        <button id="copiar" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 w-full md:max-w-xs">Copiar IMEI</button>
         
-        <!-- Selector de tipo de generación -->
-        <div class="mb-4">
-            <label for="tipo-generacion" class="block text-gray-300 text-left">Tipo de generación de IMEI</label>
-            <select id="tipo-generacion" class="w-full p-2 mt-1 bg-gray-800 text-white rounded border border-gray-600">
-                <option value="tac">Generar por TAC</option>
-            </select>
-        </div>
-
-        <!-- Campo de entrada para TAC -->
-        <div class="mb-4">
-            <label for="tac" class="block text-gray-300 text-left">Ingresar TAC:</label>
-            <input type="text" id="tac" maxlength="8" placeholder="Ingresar TAC (8 dígitos)" class="w-full p-2 mt-1 bg-gray-800 text-white rounded border border-gray-600">
-        </div>
-
-        <!-- Botón de generación -->
-        <button onclick="generarIMEIs()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded font-semibold">Generar</button>
-
-        <!-- Campo para mostrar los IMEIs generados -->
-        <div id="imeiResultado" class="mt-4 text-gray-300 text-sm text-left"></div>
-
-        <!-- Botón para copiar al portapapeles -->
-        <button id="copyButton" onclick="copiarAlPortapapeles()" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded font-semibold mt-2 hidden">Copiar al portapapeles</button>
-
-        <!-- Pie de página -->
-        <p class="text-xs text-gray-400 mt-4">© 2024 AldazUnlock. Todos los derechos reservados.</p>
+        <!-- Botón de contacto de WhatsApp -->
+        <a href="https://wa.me/message/TOJNCVY7RLSYJ1" target="_blank" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded mt-4 w-full md:max-w-xs text-center">Contacto</a>
+      </div>
     </div>
+  </div>
 
-    <script>
-        function luhnChecksum(imei) {
-            let sum = 0;
-            for (let i = 0; i < imei.length; i++) {
-                let digit = parseInt(imei[i]);
-                if (i % 2 === 1) {
-                    digit *= 2;
-                }
-                sum += digit > 9 ? digit - 9 : digit;
-            }
-            return (10 - (sum % 10)) % 10;
+  <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.min.js"></script>
+  <script>
+    const generarBtn = document.getElementById('generar');
+    const copiarBtn = document.getElementById('copiar');
+    const resultadosDiv = document.getElementById('resultados');
+
+    // Función para calcular el dígito de verificación (checksum) del IMEI usando el algoritmo Luhn
+    function calcularChecksum(imei) {
+      let suma = 0;
+      for (let i = 0; i < imei.length; i++) {
+        let num = parseInt(imei[i]);
+        if (i % 2 !== 0) { // Duplicar cada segundo dígito (índices impares en base cero)
+          num *= 2;
+          if (num > 9) num -= 9;
         }
+        suma += num;
+      }
+      return (10 - (suma % 10)) % 10;
+    }
 
-        function generarIMEIs() {
-            const tac = document.getElementById("tac").value;
-            if (tac.length !== 8 || isNaN(tac)) {
-                alert("Por favor, ingresa un TAC válido de 8 dígitos.");
-                return;
-            }
+    // Generar IMEI válidos
+    generarBtn.addEventListener('click', () => {
+      const tac = document.getElementById('tac').value;
 
-            const resultados = [];
-            for (let i = 0; i < 10; i++) {
-                // Generar número de serie aleatorio de 6 dígitos
-                const serialNumber = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
-                const partialIMEI = tac + serialNumber;
+      if (!tac || tac.length !== 8 || isNaN(tac)) {
+        alert('Por favor, ingrese un TAC válido de 8 dígitos.');
+        return;
+      }
 
-                // Calcular el dígito de verificación usando el algoritmo de Luhn
-                const checksum = luhnChecksum(partialIMEI);
-                const imei = partialIMEI + checksum;
+      // Generar 10 IMEI válidos
+      const resultados = [];
+      for (let i = 0; i < 10; i++) {
+        const snr = Math.floor(Math.random() * 1000000).toString().padStart(6, '0'); // 6 dígitos para el número de serie
+        const imeiSinChecksum = tac + snr; // IMEI sin el checksum final
+        const checksum = calcularChecksum(imeiSinChecksum);
+        const imei = imeiSinChecksum + checksum;
+        resultados.push(imei);
+      }
 
-                // Agregar el IMEI generado a la lista de resultados
-                resultados.push(imei);
-            }
+      resultadosDiv.innerHTML = resultados.join('<br>');
+    });
 
-            // Mostrar los IMEIs generados
-            document.getElementById("imeiResultado").innerHTML = resultados.map(imei => `<p>${imei}</p>`).join('');
-            document.getElementById("copyButton").classList.remove("hidden"); // Mostrar botón de copiar
-        }
-
-        function copiarAlPortapapeles() {
-            const imeiTexto = Array.from(document.querySelectorAll("#imeiResultado p"))
-                .map(p => p.textContent)
-                .join('\n');
-
-            navigator.clipboard.writeText(imeiTexto).then(() => {
-                alert("IMEIs copiados al portapapeles.");
-            }).catch(err => {
-                alert("Error al copiar: " + err);
-            });
-        }
-    </script>
+    // Copiar IMEI al portapapeles
+    copiarBtn.addEventListener('click', () => {
+      const resultadosText = resultadosDiv.innerText;
+      if (resultadosText) {
+        navigator.clipboard.writeText(resultadosText)
+          .then(() => {
+            alert('IMEI copiados al portapapeles');
+          })
+          .catch(err => {
+            alert('Error al copiar IMEI');
+          });
+      } else {
+        alert('No hay IMEI generados para copiar');
+      }
+    });
+  </script>
 </body>
 </html>
