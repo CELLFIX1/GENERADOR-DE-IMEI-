@@ -61,13 +61,15 @@
       // Generar 10 IMEI válidos
       const resultados = [];
       for (let i = 0; i < 10; i++) {
+        // Asegurarse de que el número de serie tiene 6 dígitos
         const snr = Math.floor(Math.random() * 1000000).toString().padStart(6, '0'); // 6 dígitos para el número de serie
         const imeiSinChecksum = tac + snr; // IMEI sin el checksum final
         const checksum = calcularChecksum(imeiSinChecksum);
-        const imei = imeiSinChecksum + checksum;
+        const imei = imeiSinChecksum + checksum; // Añadir el dígito de verificación
         resultados.push(imei);
       }
 
+      // Mostrar los resultados generados
       resultadosDiv.innerHTML = resultados.join('<br>');
     });
 
